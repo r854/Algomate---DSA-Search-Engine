@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Problems — Algomate</title>
+  <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/css/dashboardstyle.css">
+</head>
+<body>
+
+<nav class="dashboard-nav">
+  <a class="nav-brand" href="/">Algomate</a>
+  <ul class="nav-links">
+    <li><a href="/search">Search</a></li>
+    <li><a href="/problems" class="active">Problems</a></li>
+    <li><a href="/logout">Logout</a></li>
+  </ul>
+  <div class="nav-user" title="Admin">A</div>
+</nav>
+
+<div class="main-content">
+  <div class="page-header">
+    <h1>All Problems</h1>
+    <p>Browse all indexed problems across platforms.</p>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Problem</th>
+          <th>Tags</th>
+          <th>Difficulty</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <tr>
+          <td colspan="4" style="text-align:center;padding:60px 20px;color:var(--muted);font-size:0.9rem;">
+            <div style="font-size:2.5rem;margin-bottom:12px;opacity:0.3;">📋</div>
+            Problems will be listed here.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>

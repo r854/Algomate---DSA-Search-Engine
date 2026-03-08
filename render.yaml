@@ -1,0 +1,18 @@
+services:
+  web:
+    type: web
+    name: algomate
+    env: static
+    buildCommand: npm install && python3 -m pip install --break-system-packages numpy nltk && python3 -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab')"
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: BASE_URL
+        sync: false

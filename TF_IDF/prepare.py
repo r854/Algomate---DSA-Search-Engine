@@ -41,7 +41,7 @@ def load_problem_statement(folder):
         # Perform further processing with the text
         # (e.g., tokenize, preprocess, etc.)
         documents.append(text)
-    df = pd.DataFrame(documents,columns=['body'])
+    df = pd.DataFrame(documents,columns=['text'])
     return df
 
 def test_load_problem_statement():
@@ -53,9 +53,9 @@ def test_load_problem_statement():
         print("Words in document %d: %s\n" %(index,words))
     
 def merge_title_with_statement(question_names,df):
-    #TODO : Iterate over the question_details list and merge question_details[i]["name"] to each data column in data frame df
-    # Append each row of the DataFrame with the corresponding string from the list
-    df['text'] = [f'{string} {text}' for text, string in zip(df['text'], question_names)]
+    # Append each row of the DataFrame with the corresponding string from the list MULTIPLE TIMES
+    # This acts as a powerful title keyword boost for the BM25 algorithm.
+    df['text'] = [f'{" ".join([string]*15)} {text}' for text, string in zip(df['text'], question_names)]
     return df
 
 def test_merge():
@@ -70,7 +70,7 @@ def test_merge():
 
 def prepare_documents():
     filepath = 'filtering/FreeLeetcode.json'
-    folder = '../QData'
+    folder = 'QData'
     question_names = load_problem_title(filepath)
     documents = load_problem_statement(folder)
     modified_documents = merge_title_with_statement(question_names,documents)
@@ -112,22 +112,20 @@ def create_vocab(df):
     vocab = sorted(set(all_words))
     return vocab
 
-def create_invertedIndex(df):
+from typing import Dict, List, Tuple
+
+def create_invertedIndex(df) -> Dict[str, List[Tuple[int, int]]]:
     #TODO token --->{ (doc1,freq1),(doc2,freq2),(doc3,freq3),(doc4,freq4)}
-    inverted_index = {}
-    for idx, document in enumerate(df['text'],start=1): 
-        word_freq = {}
+    inverted_index: Dict[str, List[Tuple[int, int]]] = {}
+    for idx, document in enumerate(df['text'], start=1): 
+        word_freq: Dict[str, int] = {}
         for word in document:   # frequency of all words in a document
-            if word in word_freq:
-                word_freq[word] += 1
-            else:
-                word_freq[word] = 1
+            w = str(word)
+            word_freq[w] = word_freq.get(w, 0) + 1
         
-        for word, freq in word_freq.items():  #append the frequency of the word the word's list 
-            if word in inverted_index:
-                inverted_index[word].append((idx, freq))
-            else:
-                inverted_index[word] = [(idx, freq)]
+        for w, freq in word_freq.items():  #append the frequency of the word the word's list 
+            inverted_index.setdefault(w, []).append((idx, freq))
+            
     return inverted_index
 
 #storing in files
@@ -152,18 +150,18 @@ def store_inverted_index(inv_indx,file_path):
 
 def main():
     documents = prepare_documents()
-    store_documents(documents,'unclean_doc.pkl')
+    store_documents(documents,'TF_IDF/unclean_doc.pkl')
 
     cleaned_documents = preprocess_documents(documents)
-    store_documents(cleaned_documents,'clean_doc.pkl')
+    store_documents(cleaned_documents,'TF_IDF/clean_doc.pkl')
 
     vocab = create_vocab(cleaned_documents)
     print (vocab)
     print(len(vocab))
-    store_vocab(vocab,'vocab.pkl')
+    store_vocab(vocab,'TF_IDF/vocab.pkl')
 
     inv_indx = create_invertedIndex(cleaned_documents)
-    store_inverted_index(inv_indx,'inverted_index.pkl')
+    store_inverted_index(inv_indx,'TF_IDF/inverted_index.pkl')
     
 if __name__ == "__main__":
     main()

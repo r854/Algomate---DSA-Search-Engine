@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Problems — Algomate</title>
+  <meta name="description" content="Search coding problems by topic, algorithm, or concept across all major competitive programming platforms.">
+  <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/css/dashboardstyle.css">
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="dashboard-nav">
+  <a class="nav-brand" href="/">Algomate</a>
+  <ul class="nav-links">
+    <li><a href="/search" class="active">Search</a></li>
+    <li><a href="/problems">Problems</a></li>
+    <li><a href="/logout">Logout</a></li>
+  </ul>
+  <div class="nav-user" title="Admin">A</div>
+</nav>
+
+<!-- Main -->
+<div class="main-content">
+  <div class="page-header">
+    <h1>Problem Search</h1>
+    <p>Find the perfect problem. Just describe what you're looking for.</p>
+  </div>
+
+  <!-- Search -->
+  <div class="search-wrapper">
+    <span class="search-icon">🔍</span>
+    <input
+      id="search_query"
+      class="search-input"
+      type="text"
+      placeholder="e.g. binary search tree, dynamic programming, two sum..."
+      autocomplete="off"
+    >
+    <button class="search-btn" id="search-btn" onclick="doSearch()">Search</button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-row">
+    <span class="filter-label">Difficulty:</span>
+    <button class="filter-chip active" data-diff="all">All</button>
+    <button class="filter-chip" data-diff="easy">Easy</button>
+    <button class="filter-chip" data-diff="medium">Medium</button>
+    <button class="filter-chip" data-diff="hard">Hard</button>
+  </div>
+
+  <!-- Results meta -->
+  <div class="results-meta">
+    <span id="result-count"></span>
+  </div>
+
+  <!-- Table -->
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Problem</th>
+          <th>Tags</th>
+          <th>Difficulty</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <tr>
+          <td colspan="4" style="text-align:center;padding:60px 20px;color:var(--muted);font-size:0.95rem;">
+            <div style="font-size:2.5rem;margin-bottom:12px;opacity:0.3;">🔍</div>
+            Enter a search query to find problems
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  let allResults = [];
+  let activeDiff = 'all';
+
+  // Enter key support
+  document.getElementById('search_query').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSearch();
+  });
+
+  // Filter chips
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeDiff = chip.dataset.diff;
+      renderTable(allResults);
+    });
+  });
+
+  function doSearch() {
+    const q = document.getElementById('search_query').value.trim();
+    if (!q) return;
+
+    // Show loading
+    document.getElementById('result-count').innerHTML = '';
+    document.getElementById('table-body').innerHTML = `
+      <tr class="loading-row">
+        <td colspan="4"><span class="spinner"></span> Searching...</td>
+      </tr>`;
+
+    fetch('/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: q })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.message) {
+        allResults = [];
+      } else {
+        allResults = data;
+      }
+      renderTable(allResults);
+    })
+    .catch(() => {
+      document.getElementById('table-body').innerHTML = `
+        <tr><td colspan="4" style="text-align:center;padding:40px;color:var(--hard);">
+          Search failed. Make sure the server is running.
+        </td></tr>`;
+    });
+  }
+
+  function renderTable(data) {
+    const tbody = document.getElementById('table-body');
+    const countEl = document.getElementById('result-count');
+
+    // Filter by difficulty
+    const filtered = activeDiff === 'all'
+      ? data
+      : data.filter(d => (d.difficulty || '').toLowerCase() === activeDiff);
+
+    if (filtered.length === 0) {
+      countEl.innerHTML = '';
+      tbody.innerHTML = `
+        <tr><td colspan="4" style="text-align:center;padding:60px 20px;color:var(--muted);">
+          <div style="font-size:2.5rem;margin-bottom:12px;opacity:0.3;">😶</div>
+          No problems found for this query.
+        </td></tr>`;
+      return;
+    }
+
+    countEl.innerHTML = `Showing <strong>${filtered.length}</strong> result${filtered.length !== 1 ? 's' : ''}`;
+
+    tbody.innerHTML = filtered.map((item, i) => {
+      const diff = (item.difficulty || 'unknown').toLowerCase();
+      const diffClass = diff === 'easy' ? 'easy' : diff === 'medium' ? 'medium' : diff === 'hard' ? 'hard' : '';
+      const diffLabel = item.difficulty || '—';
+
+      const tags = Array.isArray(item.tags)
+        ? item.tags.slice(0, 3).map(t => `<span class="tag">${t}</span>`).join('')
+        : '';
+
+      return `
+        <tr onclick="window.open('${item.url}','_blank')" title="Open in LeetCode">
+          <td class="td-number">${i + 1}</td>
+          <td>
+            <a class="problem-link" href="${item.url}" target="_blank" onclick="event.stopPropagation()">
+              ${item.name || '—'}
+            </a>
+          </td>
+          <td><div class="tags-cell">${tags}</div></td>
+          <td><span class="difficulty-badge ${diffClass}">${diffLabel}</span></td>
+        </tr>`;
+    }).join('');
+  }
+</script>
+</body>
+</html>

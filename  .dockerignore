@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+.git
+.vscode
+__pycache__
+*.pkl
+scrapping
+*.md
+Dockerfile
+docker-compose.yml
+.dockerignore
+.gitignore
+app.py
+templates
+static

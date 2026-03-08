@@ -20,5 +20,3 @@ print("Total No of questions after removing duplicates : %d "%(len(unique_elemen
 # Write the unique elements list to a new JSON file
 with open(output, 'w') as file:
     json.dump(unique_elements, file, indent=4)
-
-
