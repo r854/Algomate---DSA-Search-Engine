@@ -12,71 +12,60 @@
 
 <!-- Nav -->
 <nav class="dashboard-nav">
-  <a class="nav-brand" href="/">Algomate</a>
-  <ul class="nav-links">
-    <li><a href="/search" class="active">Search</a></li>
-    <li><a href="/problems">Problems</a></li>
-    <li><a href="/logout">Logout</a></li>
-  </ul>
-  <div class="nav-user" title="Admin">A</div>
+    <a class="nav-brand" href="/">Algomate</a>
 </nav>
+
 
 <!-- Main -->
 <div class="main-content">
-  <div class="page-header">
-    <h1>Problem Search</h1>
-    <p>Find the perfect problem. Just describe what you're looking for.</p>
-  </div>
+    <div class="page-header">
+      <h1>Problem Search</h1>
+      <p>Find the perfect problem. Just describe what you're looking for.</p>
+    </div>
 
-  <!-- Search -->
-  <div class="search-wrapper">
-    <span class="search-icon">🔍</span>
-    <input
-      id="search_query"
-      class="search-input"
-      type="text"
-      placeholder="e.g. binary search tree, dynamic programming, two sum..."
-      autocomplete="off"
-    >
-    <button class="search-btn" id="search-btn" onclick="doSearch()">Search</button>
-  </div>
+    <!-- Search -->
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input id="search_query" class="search-input" type="text" placeholder="e.g. binary search tree, dynamic programming, two sum..." autocomplete="off">
+      <button class="search-btn" id="search-btn" onclick="doSearch()">Search</button>
+    </div>
 
-  <!-- Filters -->
-  <div class="filter-row">
-    <span class="filter-label">Difficulty:</span>
-    <button class="filter-chip active" data-diff="all">All</button>
-    <button class="filter-chip" data-diff="easy">Easy</button>
-    <button class="filter-chip" data-diff="medium">Medium</button>
-    <button class="filter-chip" data-diff="hard">Hard</button>
-  </div>
+    <!-- Filters -->
+    <div class="filter-row">
+      <span class="filter-label">Difficulty:</span>
+      <button class="filter-chip active" data-diff="all">All</button>
+      <button class="filter-chip" data-diff="easy">Easy</button>
+      <button class="filter-chip" data-diff="medium">Medium</button>
+      <button class="filter-chip" data-diff="hard">Hard</button>
+    </div>
 
-  <!-- Results meta -->
-  <div class="results-meta">
-    <span id="result-count"></span>
-  </div>
+    <!-- Results meta -->
+    <div class="results-meta">
+      <span id="result-count"></span>
+    </div>
 
-  <!-- Table -->
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Problem</th>
-          <th>Tags</th>
-          <th>Difficulty</th>
-        </tr>
-      </thead>
-      <tbody id="table-body">
-        <tr>
-          <td colspan="4" style="text-align:center;padding:60px 20px;color:var(--muted);font-size:0.95rem;">
-            <div style="font-size:2.5rem;margin-bottom:12px;opacity:0.3;">🔍</div>
-            Enter a search query to find problems
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Problem</th>
+            <th>Tags</th>
+            <th>Difficulty</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr>
+            <td colspan="4" style="text-align:center;padding:60px 20px;color:var(--muted);font-size:0.95rem;">
+              <div style="font-size:2.5rem;margin-bottom:12px;opacity:0.3;">🔍</div>
+              Enter a search query to find problems
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
-</div>
 
 <script>
   let allResults = [];
