@@ -18,7 +18,7 @@ RUN npm install --omit=dev
 
 # Install Python dependencies
 # Using --break-system-packages as it's a dedicated container environment
-RUN python3 -m pip install --break-system-packages numpy nltk
+RUN python3 -m pip install --break-system-packages numpy nltk pandas
 
 # Download NLTK data
 RUN python3 -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab')"
