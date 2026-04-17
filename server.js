@@ -20,6 +20,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'data.html'));
 });
 
+// Serve problems data for client-side search
+app.get('/problems-data.json', (req, res) => {
+  res.sendFile(path.join(__dirname, 'filtering', 'FreeLeetcode.json'));
+});
+
 // Search query endpoint — calls the Python search worker
 app.post('/query', (req, res) => {
   const searchQuery = req.body.query;

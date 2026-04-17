@@ -7,6 +7,7 @@
   <meta name="description" content="Search coding problems by topic, algorithm, or concept across all major competitive programming platforms.">
   <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="/css/dashboardstyle.css">
+  <script src="https://unpkg.com/lunr@2.3.9/lunr.js"></script>
 </head>
 <body>
 
@@ -68,12 +69,51 @@
   </div>
 
 <script>
-  let allResults = [];
+  let allProblems = [];
+  let idx = null;
   let activeDiff = 'all';
+
+  // Load problems and build Lunr index on page load
+  async function initSearch() {
+    try {
+      const response = await fetch('/problems-data.json');
+      allProblems = await response.json();
+      
+      // Build Lunr index for fast client-side search
+      idx = lunr(function () {
+        this.ref('number');
+        this.field('name', { boost: 10 });
+        this.field('tags');
+        
+        allProblems.forEach(problem => {
+          this.add({
+            number: problem.number,
+            name: problem.name,
+            tags: (problem.tags || []).join(' ')
+          });
+        });
+      });
+      
+      console.log('✅ Search index ready. ' + allProblems.length + ' problems indexed.');
+    } catch (err) {
+      console.error('❌ Failed to load problems:', err);
+      document.getElementById('table-body').innerHTML = `
+        <tr><td colspan="4" style="text-align:center;padding:40px;color:var(--hard);">
+          Failed to load problems data. Please refresh the page.
+        </td></tr>`;
+    }
+  }
 
   // Enter key support
   document.getElementById('search_query').addEventListener('keydown', e => {
     if (e.key === 'Enter') doSearch();
+  });
+
+  // Live search on input (no server call needed!)
+  document.getElementById('search_query').addEventListener('input', () => {
+    if (document.getElementById('search_query').value.length > 0) {
+      doSearch();
+    }
   });
 
   // Filter chips
@@ -82,41 +122,26 @@
       document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       activeDiff = chip.dataset.diff;
-      renderTable(allResults);
+      doSearch();
     });
   });
 
   function doSearch() {
     const q = document.getElementById('search_query').value.trim();
-    if (!q) return;
+    
+    let results = [];
+    
+    if (q && idx) {
+      // Client-side Lunr search - instant results!
+      const searchResults = idx.search(q);
+      results = searchResults.map(r => 
+        allProblems.find(p => p.number === r.ref)
+      ).filter(Boolean);
+    } else if (!q) {
+      results = [];
+    }
 
-    // Show loading
-    document.getElementById('result-count').innerHTML = '';
-    document.getElementById('table-body').innerHTML = `
-      <tr class="loading-row">
-        <td colspan="4"><span class="spinner"></span> Searching...</td>
-      </tr>`;
-
-    fetch('/query', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: q })
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.message) {
-        allResults = [];
-      } else {
-        allResults = data;
-      }
-      renderTable(allResults);
-    })
-    .catch(() => {
-      document.getElementById('table-body').innerHTML = `
-        <tr><td colspan="4" style="text-align:center;padding:40px;color:var(--hard);">
-          Search failed. Make sure the server is running.
-        </td></tr>`;
-    });
+    renderTable(results);
   }
 
   function renderTable(data) {
@@ -130,11 +155,21 @@
 
     if (filtered.length === 0) {
       countEl.innerHTML = '';
-      tbody.innerHTML = `
-        <tr><td colspan="4" style="text-align:center;padding:60px 20px;color:var(--muted);">
-          <div style="font-size:2.5rem;margin-bottom:12px;opacity:0.3;">😶</div>
-          No problems found for this query.
-        </td></tr>`;
+      if (document.getElementById('search_query').value.trim()) {
+        tbody.innerHTML = `
+          <tr><td colspan="4" style="text-align:center;padding:60px 20px;color:var(--muted);">
+            <div style="font-size:2.5rem;margin-bottom:12px;opacity:0.3;">😶</div>
+            No problems found for this query.
+          </td></tr>`;
+      } else {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" style="text-align:center;padding:60px 20px;color:var(--muted);font-size:0.95rem;">
+              <div style="font-size:2.5rem;margin-bottom:12px;opacity:0.3;">🔍</div>
+              Enter a search query to find problems
+            </td>
+          </tr>`;
+      }
       return;
     }
 
@@ -162,6 +197,9 @@
         </tr>`;
     }).join('');
   }
+
+  // Initialize on page load
+  window.addEventListener('load', initSearch);
 </script>
 </body>
 </html>
